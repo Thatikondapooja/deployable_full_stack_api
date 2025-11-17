@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { ProjectService } from './project.service';
-import { CreateProjectDto } from './dto.ts/create-project.dto';
-import { UpdateProjectDto } from './dto.ts/update-project.dto';
+import { CreateProjectDto } from './create-project.dto';
+import { UpdateProjectDto } from './update-project.dto';
 import {  ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Projects')
@@ -22,18 +22,18 @@ export class ProjectController {
     }
 
     @Get(':id')
-    findOne(@Param('id') id: number) {
-        return this.service.findOne(id);
+    findOne(@Param('id') projectId: number) {
+        return this.service.findOne(projectId);
     }
 
     @Patch(':id')
-    update(@Param('id') id: number, @Body() body: UpdateProjectDto) {
-        return this.service.update(id, body);
+    update(@Param('id') projectId: number, @Body() body: UpdateProjectDto) {
+        return this.service.update(projectId, body);
     }
 
     @Delete(':id')
-    delete(@Param('id') id: number) {
-        return this.service.delete(id);
+    delete(@Param('id') projectId: number) {
+        return this.service.delete(projectId);
     }
 }
 
