@@ -12,5 +12,8 @@ export class CreateInitialTables1763368145756 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "cards"`);
         await queryRunner.query(`DROP TABLE "lists"`);
     }
-
+    // UP = what to apply
+    // DOWN = how to undo
 }
+// npm run typeorm migration:run -- -d src/data-source.ts 
+// this command is used for migrations run .

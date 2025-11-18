@@ -1,10 +1,16 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, UseGuards } from '@nestjs/common';
 import { ListsService } from './lists.service';
 import { CreateListsDto } from './create-lists-dto';
 import { UpdateListsDto } from './update-lists.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @ApiTags('Lists')
+
+
+@UseGuards(JwtAuthGuard) // <-- protects all routes in this controller
+@ApiBearerAuth() // <-- This adds the lock icon for JWT
+
 @Controller('lists')
 export class ListsController {
     constructor(private service: ListsService) { }

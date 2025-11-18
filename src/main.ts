@@ -10,6 +10,7 @@ async function bootstrap() {
     .setDescription('API documentation for Project App')
     .setVersion('1.0')
     .addTag('projects')
+    .addBearerAuth() // Enables JWT input in Swagger
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
