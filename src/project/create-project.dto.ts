@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateProjectDto {
+    user(user: any) {
+        throw new Error('Method not implemented.');
+    }
     @ApiProperty()
     projectName: string;
 

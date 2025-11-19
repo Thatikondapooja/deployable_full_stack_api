@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class UpdatesCardsDtos {
 
     @ApiProperty()
-    listId?: number;
+    listId: number;
 
     @ApiProperty()
     cardName?: string;

@@ -6,8 +6,8 @@ export class Cards{
     @PrimaryGeneratedColumn()
     cardId:number;
 
-    // @Column({nullable:true})
-    // listId:number;
+ @Column({nullable:true})
+     listId:number;
 
     @Column({ nullable: true })
     cardName:string;

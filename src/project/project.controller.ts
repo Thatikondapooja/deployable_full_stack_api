@@ -1,15 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './create-project.dto';
 import { UpdateProjectDto } from './update-project.dto';
 import {  ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @ApiTags('Projects')
 
-@UseGuards(JwtAuthGuard) // <-- protects all routes in this controller
+    @UseGuards(JwtAuthGuard, RolesGuard) // <-- protects all routes in this controller
 
-@ApiBearerAuth() // <-- This adds the lock icon for JWT
+ @ApiBearerAuth() // <-- This adds the lock icon for JWT
 
 
 @Controller('project')
@@ -36,10 +38,11 @@ export class ProjectController {
     }
 
     @Patch(':id')
-    update(@Param('id') projectId: number, @Body() body: UpdateProjectDto) {
+    update(@Param('id', ParseIntPipe) projectId: number, @Body() body: UpdateProjectDto) {
         return this.service.update(projectId, body);
     }
 
+    @Roles('admin')
     @Delete(':id')
     delete(@Param('id') projectId: number) {
         return this.service.delete(projectId);

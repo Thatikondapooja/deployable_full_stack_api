@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CardsService } from './cards.service';
 import { CreatedCardsDtos } from './create-cards-dto';
 import { UpdatesCardsDtos } from './UpdatecardsDto.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 @ApiTags('cards')
-@UseGuards(JwtAuthGuard) // <-- protects all routes in this controller
+@UseGuards(JwtAuthGuard,RolesGuard) // <-- protects all routes in this controller
 @ApiBearerAuth() // <-- This adds the lock icon for JWT
 
 @Controller('cards')
@@ -29,12 +30,12 @@ export class CardsController {
     }
 
     @Patch(':id')
-    update(@Param('id') id: number, @Body() body: UpdatesCardsDtos){
+    update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdatesCardsDtos){
         return this.service.update(id,body)
     }
 
     @Delete(':id')
-    delete(@Param('id') id:number){
+    delete(@Param('id', ParseIntPipe) id:number){
         return this.service.delete(id)
     }
 }
