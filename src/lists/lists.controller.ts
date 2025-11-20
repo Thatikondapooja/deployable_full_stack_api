@@ -4,8 +4,8 @@ import { CreateListsDto } from './create-lists-dto';
 import { UpdateListsDto } from './update-lists.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
 
 @ApiTags('Lists')
 
@@ -21,7 +21,7 @@ export class ListsController {
     create(@Body() body: CreateListsDto) {
         return this.service.create(body);
     }
-
+    @Roles('admin')
     @Get()
     findAll() {
         return this.service.findAll();
@@ -36,7 +36,7 @@ export class ListsController {
     update(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateListsDto) {
         return this.service.update(id, body);
     }
-    @Roles('admin')
+ 
     @Delete(':id')
     delete(@Param('id', ParseIntPipe) id: number) {
         return this.service.delete(id);

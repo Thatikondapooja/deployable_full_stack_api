@@ -7,8 +7,8 @@ import { RoleSeeder } from './role.seed';
 
 @Module({
   imports:[TypeOrmModule.forFeature([Role])],
-  providers: [RoleSeeder],
+  providers: [RolesService,RoleSeeder],
   controllers: [RolesController],
-  exports: [TypeOrmModule]
+  exports: [RolesService]
 })
 export class RolesModule {}

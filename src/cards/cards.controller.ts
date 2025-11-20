@@ -4,7 +4,8 @@ import { CardsService } from './cards.service';
 import { CreatedCardsDtos } from './create-cards-dto';
 import { UpdatesCardsDtos } from './UpdatecardsDto.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
 @ApiTags('cards')
 @UseGuards(JwtAuthGuard,RolesGuard) // <-- protects all routes in this controller
 @ApiBearerAuth() // <-- This adds the lock icon for JWT
@@ -13,12 +14,12 @@ import { RolesGuard } from 'src/auth/roles.guard';
 export class CardsController {
     constructor(private service: CardsService){}
 
-    
+   
     @Post()
     create(@Body() body:CreatedCardsDtos){
        return this.service.create(body) ;
     }
-
+    @Roles('admin')
     @Get()
     findAll(){
         return this.service.findAll()

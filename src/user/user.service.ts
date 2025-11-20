@@ -2,88 +2,54 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { User } from './user.entity';
-import { CreateUserDto } from './user.dto';
-import * as bcrypt from 'bcrypt';
 import { Role } from 'src/roles/role.entity';
+import { CreateRegisterDto } from 'src/auth/dto/register.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
     constructor(
-        @InjectRepository(User)
-        private userRepo: Repository<User>,
-
-        @InjectRepository(Role)
-        private roleRepo: Repository<Role>,
+        @InjectRepository(User) private readonly userRepo: Repository<User>,
+        @InjectRepository(Role) private readonly roleRepo: Repository<Role>,
     ) { }
 
-    // Create new user
-    async create(body: CreateUserDto) {
-        const { username, password, roles } = body;
+    async register(dto: CreateRegisterDto) {
+        const { username, email, password, roles } = dto;
 
-        const existingUser = await this.userRepo.findOne({ where: { username } });
-        if (existingUser) {
-            throw new Error('Username already exists');
-        }
+        const existing = await this.userRepo.findOne({
+            where: [{ username }, { email }],
+        });
+        if (existing) throw new Error('Username or Email already exists');
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const selectedRoles = await this.roleRepo.find({
-            where: { role: In(roles) },
-        });
-
-        if (selectedRoles.length !== roles.length) {
+        const userRoles = await this.roleRepo.find({ where: { role: In(roles) } });
+        if (userRoles.length === 0 || userRoles.length !== roles.length)
             throw new NotFoundException('One or more roles do not exist');
-        }
 
         const user = this.userRepo.create({
             username,
+            email,
             password: hashedPassword,
-            roles: selectedRoles,
+            roles: userRoles,
         });
 
-        return this.userRepo.save(user);
+        return this.userRepo.save(user);// save user in db.
     }
 
-    async createUser(body: CreateUserDto) {
-        return this.create(body);
-    }
-
-    async findByUsername(username: string) {
-        return this.userRepo.findOne({
-            where: { username },
-            relations: ['roles'],
-        });
+    async findByEmail(email: string) {
+        return this.userRepo.findOne({ where: { email }, relations: ['roles'] });
     }
 
     async findById(userId: number) {
-        return this.userRepo.findOne({
-            where: { userId },
-            relations: ['roles'],
-        });
+        return this.userRepo.findOne({ where: { userId }, relations: ['roles'] });
     }
 
     async setRefreshToken(userId: number, refreshToken: string) {
-        return this.userRepo.update(userId, { refreshToken });
-    }
-
-    async updateUserRoles(userId: number, roles: string[]) {
-        const user = await this.findById(userId);
+        const user = await this.userRepo.findOne({ where: { userId } });
         if (!user) throw new NotFoundException('User not found');
 
-        
-        const selectedRoles = await this.roleRepo.find({
-            where: { role: In(roles) },
-        });
-        console.log('Requested roles from request:', roles);
-        console.log('Roles found in DB:', selectedRoles.map(r => r.role));
-
-
-        if (selectedRoles.length !== roles.length) {
-            throw new NotFoundException('One or more roles do not exist');
-        }
-
-        user.roles = selectedRoles;
-
+        user.refreshToken = refreshToken;
         return this.userRepo.save(user);
     }
 }

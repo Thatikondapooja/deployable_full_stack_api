@@ -4,8 +4,8 @@ import { CreateProjectDto } from './create-project.dto';
 import { UpdateProjectDto } from './update-project.dto';
 import {  ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/roles/roles.guard';
+import { Roles } from 'src/roles/roles.decorator';
 
 @ApiTags('Projects')
 
@@ -20,6 +20,7 @@ export class ProjectController {
 
 
 
+    @Roles('admin')
     @Post()
     create(@Body() body: CreateProjectDto) {
         console.log(body); // Should show { userId, username }
@@ -42,7 +43,6 @@ export class ProjectController {
         return this.service.update(projectId, body);
     }
 
-    @Roles('admin')
     @Delete(':id')
     delete(@Param('id') projectId: number) {
         return this.service.delete(projectId);

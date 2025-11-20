@@ -1,26 +1,24 @@
-import { Roles } from 'src/auth/roles.decorator';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
 import { Role } from 'src/roles/role.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinColumn, JoinTable } from 'typeorm';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
-    userId: number;   // Primary Key, unique identifier
+    userId: number;
 
     @Column({ unique: true })
-    username: string;  // User login name, must be unique
+    username: string;
+
+    @Column({ unique: true })
+    email: string;
 
     @Column()
-    password: string;  // Hashed password
+    password: string; // hashed password
 
-    // @Column({ default: 'User' })
-    // role: string;     // Optional: 'Admin', 'User', etc.
+    @Column({ nullable: true })
+    refreshToken?: string;
 
-    @Column({nullable:true})
-    refreshToken?:string  // stored hashed refresh tokens.
-
-    @ManyToMany(()=>Role, (role)=>role.users,{eager:true})
+    @ManyToMany(() => Role, (role) => role.users, { eager: true })
     @JoinTable()
-    roles:Role[]
-
+    roles: Role[];
 }
