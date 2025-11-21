@@ -5,6 +5,7 @@ import { User } from './user.entity';
 import { Role } from 'src/roles/role.entity';
 import { CreateRegisterDto } from 'src/auth/dto/register.dto';
 import * as bcrypt from 'bcrypt';
+import { dot } from 'node:test/reporters';
 
 @Injectable()
 export class UserService {
@@ -14,22 +15,24 @@ export class UserService {
     ) { }
 
     async register(dto: CreateRegisterDto) {
-        const { username, email, password, roles } = dto;
-
+        const { username, email, password} = dto;
+  const roles=dto.roles??["user"]
+  console.log("default user assign ",roles)
         const existing = await this.userRepo.findOne({
-            where: [{ username }, { email }],
+            where: [{ username: dto.username }, { email: dto.email }],
         });
         if (existing) throw new Error('Username or Email already exists');
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
-        const userRoles = await this.roleRepo.find({ where: { role: In(roles) } });
+        console.log("hashedPassword", hashedPassword)
+        
+        const userRoles = roles?.length ? await this.roleRepo.find({ where: { role: In(roles) } }) : [];
         if (userRoles.length === 0 || userRoles.length !== roles.length)
             throw new NotFoundException('One or more roles do not exist');
 
         const user = this.userRepo.create({
             username,
-            email,
+           email,
             password: hashedPassword,
             roles: userRoles,
         });
@@ -38,9 +41,12 @@ export class UserService {
     }
 
     async findByEmail(email: string) {
-        return this.userRepo.findOne({ where: { email }, relations: ['roles'] });
+        return this.userRepo.findOne({
+            where: { email }, relations: ['roles'], select: ['userId', 'username', 'email', 'password', 'refreshToken', 'roles'], // Include password!
+});
     }
 
+   
     async findById(userId: number) {
         return this.userRepo.findOne({ where: { userId }, relations: ['roles'] });
     }

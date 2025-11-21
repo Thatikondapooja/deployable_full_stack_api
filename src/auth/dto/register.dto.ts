@@ -15,8 +15,7 @@ export class CreateRegisterDto {
  
     password: string;
 
-    @ApiProperty({ example: ['user'] })
-    @ArrayNotEmpty()
-    @ArrayUnique()
-    roles: string[];
+    @ApiProperty({ example: ['user'], required: false })
+    roles?: string[];
+
 }
