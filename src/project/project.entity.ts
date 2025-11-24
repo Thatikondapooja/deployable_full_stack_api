@@ -1,5 +1,5 @@
 import { Lists } from 'src/lists/lists.entity';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 
 @Entity('projects') // table name in database
 export class Project {
@@ -14,10 +14,10 @@ export class Project {
     description: string;
 
     @Column({ name: 'start_date', type: 'date', nullable: true })
-    startDate: Date;
+    startDate: string;
 
     @Column({ name: 'target_end_date', type: 'date', nullable: true })
-    targetEndDate: Date;
+    targetEndDate: string;
 
     @Column({ name: 'project_category', type: 'varchar', nullable: true })
     projectCategory: string;

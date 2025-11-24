@@ -25,30 +25,39 @@ export class UserService {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log("hashedPassword", hashedPassword)
-        
+      
+
         const userRoles = roles?.length ? await this.roleRepo.find({ where: { role: In(roles) } }) : [];
         if (userRoles.length === 0 || userRoles.length !== roles.length)
             throw new NotFoundException('One or more roles do not exist');
 
         const user = this.userRepo.create({
             username,
-           email,
+                email,
             password: hashedPassword,
             roles: userRoles,
         });
+   
 
         return this.userRepo.save(user);// save user in db.
     }
 
     async findByEmail(email: string) {
         return this.userRepo.findOne({
-            where: { email }, relations: ['roles'], select: ['userId', 'username', 'email', 'password', 'refreshToken', 'roles'], // Include password!
+            where: { email }, relations: ['roles'], select: {userId:true, username:true, email:true, password:true, refreshToken:true}, // Include password!
 });
     }
 
    
     async findById(userId: number) {
-        return this.userRepo.findOne({ where: { userId }, relations: ['roles'] });
+        return this.userRepo.findOne({
+            where: { userId }, relations: ['roles'], select: {
+                userId: true,
+                username: true,
+                email: true,
+                password: true,
+                refreshToken: true
+            } });
     }
 
     async setRefreshToken(userId: number, refreshToken: string) {

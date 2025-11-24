@@ -20,10 +20,10 @@ export class ProjectController {
 
 
 
-    @Roles('admin')
+    @Roles('user')
     @Post()
     create(@Body() body: CreateProjectDto) {
-        console.log(body); // Should show { userId, username }
+        console.log("body from controller",body); // Should show { userId, username }
         // return body.user
         return this.service.create(body);
     }

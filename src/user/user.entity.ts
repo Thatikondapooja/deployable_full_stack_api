@@ -12,13 +12,13 @@ export class User {
     @Column({ unique: true })
     email: string;
 
-    @Column({ select: false })
+    @Column({ select: true })
     password: string; // hashed password
 
     @Column({ nullable: true })
     refreshToken?: string;
 
-    @ManyToMany(() => Role, (role) => role.users, { eager: true })
+    @ManyToMany(() => Role, (role) => role.users)
     @JoinTable()
     roles: Role[];
 }

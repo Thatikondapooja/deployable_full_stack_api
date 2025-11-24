@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Project } from './project.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateProjectDto } from './create-project.dto';
 
 @Injectable()
 export class ProjectService {
@@ -11,9 +12,15 @@ export class ProjectService {
         private repo: Repository<Project>,
     ) { }
 
-   async create(body: any) {
+    async create(body: any) {
        const project = this.repo.create(body);
-       console.log("project", project)
+        console.log("projectCategory", body.projectCategory)  
+        console.log("projectName", body.projectName)
+
+        console.log("teamMembers", body.teamMembers)
+
+        console.log("project from service", project)
+
        console.log("body", body)
 
         return this.repo.save(project);
