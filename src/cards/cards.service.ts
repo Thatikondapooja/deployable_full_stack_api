@@ -16,21 +16,21 @@ export class CardsService {
 //        return this.cardRepo.save(card);
 //      }
     async create(body: CreatedCardsDtos) {
-             const { cardName, listId } = body;
+            //  const { cardName, listId } = body;
      
              // 1. Find the project
         const list = await this.listRepo.findOne({
-                 where: { listId },
+                 where: { listId:body.listId },
              });
      
         if (!list) {
-                 throw new NotFoundException(`list with ID ${listId} not found`);
+            throw new NotFoundException(`list with ID ${body.listId} not found`);
              }
      
              // 2. Create the list and attach project
              const card = this.cardRepo.create({
-                 cardName,
-                 list,   // attach the full project entity
+                 cardName:body.cardName,
+                 list:list,   // attach the full project entity
              });
      
              // 3. Save

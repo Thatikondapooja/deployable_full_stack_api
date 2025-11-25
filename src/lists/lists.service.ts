@@ -17,21 +17,21 @@ export class ListsService {
 
     // CREATE LIST
     async create(body: CreateListsDto) {
-        const { listName, projectId } = body;
+        // const { listName, projectId } = body;
 
         // 1. Find the project
         const project = await this.projectRepo.findOne({
-            where: { projectId },
+            where: { projectId: body.projectId },
         });
 
         if (!project) {
-            throw new NotFoundException(`Project with ID ${projectId} not found`);
+            throw new NotFoundException(`Project with ID ${body.projectId } not found`);
         }
 
         // 2. Create the list and attach project
         const list = this.listRepo.create({
-            listName,
-            project,   // attach the full project entity
+            listName: body.listName,
+            project:project,   // attach the full project entity
         });
 
         // 3. Save

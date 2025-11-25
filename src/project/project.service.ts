@@ -16,6 +16,7 @@ export class ProjectService {
        const project = this.repo.create(body);
         console.log("projectCategory", body.projectCategory)  
         console.log("projectName", body.projectName)
+        console.log("projectName", body.projectId)
 
         console.log("teamMembers", body.teamMembers)
 
