@@ -70,7 +70,7 @@ export class CardsService {
      }
  
     async delete(cardId: number) {
-        const results = await this.cardRepo.delete({cardId})
+        const results = await this.cardRepo.delete(cardId)
         if (results.affected === 0) throw new NotFoundException(`card with id ${cardId} not found`) ;
          return {message:"card deleted successfully"}
      }
