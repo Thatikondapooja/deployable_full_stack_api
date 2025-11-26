@@ -28,7 +28,7 @@ export class ListsController {
     }
 
     @Get(':id')
-    findOne(@Param('id') id: number) {
+    findOne(@Param('id', ParseIntPipe) id: number) {
         return this.service.findOne(id);
     }
   

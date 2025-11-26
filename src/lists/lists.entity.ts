@@ -10,14 +10,21 @@ export class Lists {
     @Column({nullable:true})
     listName: string;
 
-    @ManyToOne(() => Project, (project) => project.list)
+    @ManyToOne(() => Project, (project) => project.list, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'projectId' }) // explicitly map the foreign key // this project id is display in the list project id. if you dont put it it only prints null value.
     project: Project;
 
     @Column({ nullable: true })
     projectId: number; // now TypeORM will fill this automatically.
 
-    @OneToMany(() => Cards, (card) => card.list)// one project => many lists.
-        cards: Cards[];
+    // @OneToMany(() => Cards, (card) => card.list,{cascade:true,onDelete:"CASCADE"})// one project => many lists.
+
+    //     cards: Cards[];
     
+    @OneToMany(() => Cards, card => card.list, {
+        cascade: true,
+        onDelete: "CASCADE"
+    })
+    cards: Cards[];
+
 }

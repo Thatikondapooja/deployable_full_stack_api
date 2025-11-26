@@ -34,7 +34,7 @@ export class ProjectController {
     }
 
     @Get(':id')
-    findOne(@Param('id') projectId: number) {
+    findOne(@Param('id', ParseIntPipe) projectId: number) {
         return this.service.findOne(projectId);
     }
 
@@ -44,7 +44,7 @@ export class ProjectController {
     }
 
     @Delete(':id')
-    delete(@Param('id') projectId: number) {
+    delete(@Param('id', ParseIntPipe) projectId: number) {
         return this.service.delete(projectId);
     }
 

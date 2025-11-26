@@ -7,6 +7,8 @@ import { CreateListsDto } from './create-lists-dto';
 
 @Injectable()
 export class ListsService {
+    cardRepository: any;
+    listRepository: any;
     constructor(
         @InjectRepository(Lists)
         private listRepo: Repository<Lists>,
@@ -76,4 +78,12 @@ export class ListsService {
 
         return { message: "List deleted successfully" };
     }
+
+
+    // async delete(listId: number) {
+    //     await this.cardRepository.delete({ list: { listId } });
+
+    //     return await this.listRepository.delete(listId);
+    // }
+
 }

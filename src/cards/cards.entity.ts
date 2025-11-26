@@ -12,7 +12,9 @@ export class Cards{
     @Column({ nullable: true })
     cardName:string;
 
-    @ManyToOne(() => Lists, (list) => list.cards)
+    @ManyToOne(() => Lists, (list) => list.cards,{
+        onDelete:"CASCADE"
+    })
      @JoinColumn({ name: "listId" }) 
     list:Lists;
    

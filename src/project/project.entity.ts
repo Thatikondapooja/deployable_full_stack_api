@@ -25,7 +25,11 @@ export class Project {
     @Column({ name: 'team_members', type: 'text', array: true, nullable: true })
     teamMembers: string[];
   
-    @OneToMany(() => Lists, (list) => list.project)// one project => many lists.
+    @OneToMany(() => Lists, (list) => list.project,
+    {cascade:true,
+    onDelete:'CASCADE',
+    })// one project => many lists.
+  
     list: Lists[];
 
 
