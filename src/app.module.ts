@@ -7,6 +7,10 @@ import { ProjectModule } from './project/project.module';
 import { ListsModule } from './lists/lists.module';
 import { CardsModule } from './cards/cards.module';
 import { RolesModule } from './roles/roles.module';
+import { AccountModule } from './account/account.module';
+import { OtpModule } from './otp/otp.module';
+import { MailService } from './mail/mail.service';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -27,6 +31,10 @@ import { RolesModule } from './roles/roles.module';
     ListsModule,
     CardsModule,
     RolesModule,
+    AccountModule,
+    OtpModule,
+    MailModule,
   ],
+  providers: [MailService],
 })
 export class AppModule { }

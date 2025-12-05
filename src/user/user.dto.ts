@@ -13,4 +13,7 @@ export class CreateUserDto {
 
     @ApiProperty({ example: ['Admin', 'User'] })
     roles: string[];
+
+    @ApiProperty({ example: 8680898257,required:false})
+    phoneNumber:string;
 }

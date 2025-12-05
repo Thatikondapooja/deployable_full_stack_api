@@ -13,13 +13,13 @@ import { Roles } from 'src/roles/roles.decorator';
 @Controller('cards')
 export class CardsController {
     constructor(private service: CardsService){}
-
+    @Roles('admin')
    
     @Post()
     create(@Body() body:CreatedCardsDtos){
        return this.service.create(body) ;
     }
-    @Roles('admin')
+   
     @Get()
     findAll(){
         return this.service.findAll()

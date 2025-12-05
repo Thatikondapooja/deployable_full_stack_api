@@ -22,7 +22,9 @@ export class RolesGuard implements CanActivate {
         }
 
         // Allow if user has at least one required role
-        const hasRole = user.roles.some(role => requiredRoles.includes(role));
+        const hasRole = user.roles.some(role =>
+            requiredRoles.includes(role) 
+        );
         if (hasRole) return true;
 
         throw new ForbiddenException("You don't have permission (role mismatch)");

@@ -17,9 +17,6 @@ import { Roles } from 'src/roles/roles.decorator';
 @Controller('project')
 export class ProjectController {
     constructor(private service: ProjectService) { }
-
-
-
     @Roles('user')
     @Post()
     create(@Body() body: CreateProjectDto) {
@@ -27,7 +24,7 @@ export class ProjectController {
         // return body.user
         return this.service.create(body);
     }
-
+  
     @Get()
     findAll() {
         return this.service.findAll();
@@ -37,12 +34,12 @@ export class ProjectController {
     findOne(@Param('id', ParseIntPipe) projectId: number) {
         return this.service.findOne(projectId);
     }
-
+    @Roles('admin')
     @Patch(':id')
     update(@Param('id', ParseIntPipe) projectId: number, @Body() body: UpdateProjectDto) {
         return this.service.update(projectId, body);
     }
-
+    @Roles('user')
     @Delete(':id')
     delete(@Param('id', ParseIntPipe) projectId: number) {
         return this.service.delete(projectId);

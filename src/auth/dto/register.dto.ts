@@ -12,8 +12,10 @@ export class CreateRegisterDto {
 
     @ApiProperty()
     @IsString()
- 
     password: string;
+
+    @ApiProperty()
+    phoneNumber: string;
 
     @ApiProperty({ example: ['user'], required: false })
     roles?: string[];

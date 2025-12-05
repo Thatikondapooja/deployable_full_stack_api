@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Role } from 'src/roles/role.entity';
+import { Otp } from 'src/otp/otp.entity';
 
 @Entity()
 export class User {
@@ -18,7 +19,17 @@ export class User {
     @Column({ nullable: true })
     refreshToken?: string;
 
-    @ManyToMany(() => Role, (role) => role.users)
+    @Column({ nullable: true })
+    phoneNumber: string;
+
+    @ManyToMany(() => Role, (role) => role.users, { eager: false })
     @JoinTable()
     roles: Role[];
+    @OneToMany(() => Otp, (otp) => otp.user)
+    otps: Otp[];
+
+    
+   
+  
+    
 }

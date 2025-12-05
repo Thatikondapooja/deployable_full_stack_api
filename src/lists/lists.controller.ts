@@ -16,7 +16,7 @@ import { Roles } from 'src/roles/roles.decorator';
 @Controller('lists')
 export class ListsController {
     constructor(private service: ListsService) { }
-
+    @Roles('user')
     @Post()
     create(@Body() body: CreateListsDto) {
         return this.service.create(body);

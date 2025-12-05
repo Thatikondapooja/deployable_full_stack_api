@@ -4,6 +4,7 @@ import { UserService } from 'src/user/user.service';
 import { CreateRegisterDto } from './dto/register.dto';
 import { CreateLoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -57,6 +58,7 @@ export class AuthService {
                 userId: user.userId,
                 email: user.email,
                 username: user.username,
+                phoneNumber:user.phoneNumber,
                 roles: user.roles.map(r => r.role),
             },
       
@@ -75,6 +77,12 @@ export class AuthService {
 
         return { access_token };
       
+    }
+    async issueTokensForUser(user: User) {
+        const payload = { sub: user.userId, email: user.email, roles: user.roles };
+        const access = this.jwtService.sign(payload, { expiresIn: '15m' });
+        const refresh = this.jwtService.sign({ sub: user.userId }, { expiresIn: '7d' });
+        return { access_token: access, refresh_token: refresh, user: { id: user.userId, email: user.email } };
     }
     
 }
