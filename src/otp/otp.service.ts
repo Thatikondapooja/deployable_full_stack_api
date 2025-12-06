@@ -1,12 +1,11 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Otp } from './otp.entity';
-import * as bcrypt from 'bcrypt';
-import { randomInt } from 'crypto';
-import { User } from 'src/user/user.entity';
-import { MailService } from 'src/mail/mail.service';
-
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { randomInt } from "crypto";
+import { User } from "src/user/user.entity";
+import { Otp } from "./otp.entity";
+import { MailService } from "src/mail/mail.service";
+import { Repository } from "typeorm";
+import * as bcrypt from 'bcrypt'
 @Injectable()
 export class OtpService {
     constructor(
@@ -15,97 +14,75 @@ export class OtpService {
         private mailService: MailService,
     ) { }
 
-    // generate a secure 6-digit OTP as string
     private generateOtpString(): string {
-        // randomInt(0, 1_000_000) returns 0..999999
-        const v = randomInt(0, 1_000_000).toString().padStart(6, '0');
-        return v;
+        return randomInt(0, 1_000_000).toString().padStart(6, '0');
     }
 
-    // create & send OTP to user's email. returns metadata (not raw otp).
-    async createAndSendOtp(email: string, expirySeconds = 300) {
-        const user = await this.userRepo.findOne({ where: { email } });
+    async createAndSendOtp(email: string) {
+        const user = await this.userRepo.findOne({
+            where: { email },
+        });
+
+        console.log("OTP: Found user →", user);
+
         if (!user) throw new NotFoundException('User not found');
 
-        // Rate-limit: count previous issued OTPs in last X minutes (simple)
-        const recentOtps = await this.otpRepo.find({
-            where: { user },
-            order: { createdAt: 'DESC' },
-            take: 5,
-        });
+        const otpPlain = this.generateOtpString();
+        console.log("otpPlain:", otpPlain);
 
-        // Simple rule: do not allow more than 5 sends in 1 hour
-        const ONE_HOUR_MS = 60 * 60 * 1000;
-        const now = Date.now();
-        const recentIn1h = recentOtps.filter(o => now - o.createdAt.getTime() < ONE_HOUR_MS);
-        if (recentIn1h.length >= 5) {
-            throw new BadRequestException('Too many OTP requests. Try later.');
-        }
+        const otpHash = await bcrypt.hash(otpPlain, 10);
+        console.log("otpHash:", otpHash);
 
-        // Create OTP
-        const otpPlain = this.generateOtpString(); // e.g. "035412"
-        const saltRounds = 10;
-        const otpHash = await bcrypt.hash(otpPlain, saltRounds);
-
-        // Build entity
-        const expiresAt = Date.now() + expirySeconds * 1000;
         const otpEntity = this.otpRepo.create({
-            user,
+            user:user,           // ✔ FIXED — proper relation
             otpHash,
-            expiresAt,
-            attempts: 0,
-            issuedCount: 1,
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         });
 
-        // save
         await this.otpRepo.save(otpEntity);
 
-        // send via MailService (or SMS)
+        console.log("Sending OTP to:", user.email);
+
         await this.mailService.sendOtpEmail(user.email, otpPlain);
 
-        // DO NOT return otpPlain to client
-        return { message: 'OTP sent' };
+        return { message: 'OTP sent successfully' };
     }
 
-    // verify OTP; returns user if ok
-    async verifyOtp(email: string, otpPlain: string) {
+    async verifyOtp(email: string, otp: string) {
         const user = await this.userRepo.findOne({ where: { email } });
+
+        console.log("Verify OTP For User →", user);
+
         if (!user) throw new NotFoundException('User not found');
 
-        // Find the latest OTP for user
         const otpEntity = await this.otpRepo.findOne({
-            where: { user },
+            where: { user :{userId:user.userId}},
+            relations: ['user'],
             order: { createdAt: 'DESC' },
         });
 
-        if (!otpEntity) throw new BadRequestException('No OTP found. Request a new one.');
+        if (!otpEntity) throw new BadRequestException('No OTP found');
 
-        const now = Date.now();
-
-        if (now > Number(otpEntity.expiresAt)) {
-            // expired - delete the OTP record and tell user
+        if (new Date() > otpEntity.expiresAt) {
             await this.otpRepo.delete(otpEntity.id);
-            throw new BadRequestException('OTP expired. Request a new one.');
+            throw new BadRequestException('OTP expired');
         }
 
-        // if attempts exceeded (3), block this OTP
         if (otpEntity.attempts >= 3) {
             await this.otpRepo.delete(otpEntity.id);
-            throw new BadRequestException('Too many failed attempts. Request a new OTP.');
+            throw new BadRequestException('Too many attempts');
         }
 
-        const isMatch = await bcrypt.compare(otpPlain, otpEntity.otpHash);
+        const isMatch = await bcrypt.compare(otp, otpEntity.otpHash);
 
         if (!isMatch) {
-            // increment attempts
-            otpEntity.attempts = otpEntity.attempts + 1;
+            otpEntity.attempts++;
             await this.otpRepo.save(otpEntity);
-            throw new BadRequestException('Invalid OTP.');
+            throw new BadRequestException('Invalid OTP');
         }
 
-        // success: delete used OTP and return user (or user id)
         await this.otpRepo.delete(otpEntity.id);
 
-        return user;
+        return { message: 'OTP verified successfully', user };
     }
 }

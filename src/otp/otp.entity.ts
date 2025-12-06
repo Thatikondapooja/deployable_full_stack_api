@@ -1,32 +1,25 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, CreateDateColumn } from 'typeorm';
 import { User } from 'src/user/user.entity';
 
-@Entity('otps')
+@Entity()
 export class Otp {
     @PrimaryGeneratedColumn()
     id: number;
-
-    // Link to user
-    @ManyToOne(() => User, user => user.otps, { onDelete: 'CASCADE' })
+    @ManyToOne(() => User, user => user.otps)
     user: User;
 
-    // Hashed OTP value
     @Column()
     otpHash: string;
 
-    // expire timestamp (ms since epoch)
-    @Column({ type: 'bigint' })
-    expiresAt: number;
+    @Column({type:'timestamp'})
+    expiresAt: Date;
 
-    // number of verification attempts
     @Column({ default: 0 })
     attempts: number;
 
-    // number of times OTP was issued (rate limiting)
     @Column({ default: 1 })
     issuedCount: number;
 
-    // created timestamp
     @CreateDateColumn()
     createdAt: Date;
 }

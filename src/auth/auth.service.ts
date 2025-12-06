@@ -19,6 +19,7 @@ export class AuthService {
 
     async validateUser(email: string, password: string) {
         const user = await this.userService.findByEmail(email);
+        console.log(" user from auth service:", user);
 
         console.log("INPUT PASSWORD:", password);
         console.log("DB PASSWORD:", user?.password);
@@ -79,10 +80,18 @@ export class AuthService {
       
     }
     async issueTokensForUser(user: User) {
-        const payload = { sub: user.userId, email: user.email, roles: user.roles };
+        const payload = {
+            sub: user.userId, email: user.email, roles: user.roles.map(r => r.role),
+ };
         const access = this.jwtService.sign(payload, { expiresIn: '15m' });
         const refresh = this.jwtService.sign({ sub: user.userId }, { expiresIn: '7d' });
-        return { access_token: access, refresh_token: refresh, user: { id: user.userId, email: user.email } };
+        return {
+            access_token: access, refresh_token: refresh, user: {
+                userId: user.userId, email: user.email, roles: user.roles.map(r => r.role)
+                
+} };
     }
+
+    
     
 }

@@ -20,7 +20,7 @@ export class OtpController {
     async verifyOtp(@Body() dto: VerifyOtpDto) {
         const user = await this.otpService.verifyOtp(dto.email, dto.otp);
         // issue JWT (authService should have method to create tokens)
-        const tokens = await this.authService.issueTokensForUser(user);
+        const tokens = await this.authService.issueTokensForUser(user.user);
         return tokens;
     }
 }

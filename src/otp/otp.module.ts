@@ -2,14 +2,15 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Otp } from './otp.entity';
 import { OtpService } from './otp.service';
-import { AuthModule } from '../auth/auth.module';
-import { UserModule } from '../user/user.module';   // ADD THIS
+import { User } from 'src/user/user.entity';
+import { UserModule } from 'src/user/user.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Otp]),
-    UserModule,    // FIX 1 — Add UserModule
-    AuthModule,    // optional if you use AuthService here
+    TypeOrmModule.forFeature([Otp, User]),
+    UserModule,
+    MailModule,
   ],
   providers: [OtpService],
   exports: [OtpService],
