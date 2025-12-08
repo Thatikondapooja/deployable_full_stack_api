@@ -46,5 +46,5 @@ export class AuthController {
 
         return result;
     }
-
+   
 }

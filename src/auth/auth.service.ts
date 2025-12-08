@@ -84,7 +84,9 @@ export class AuthService {
             sub: user.userId, email: user.email, roles: user.roles.map(r => r.role),
  };
         const access = this.jwtService.sign(payload, { expiresIn: '15m' });
+        console.log(" access from issueTokensForUser", access)
         const refresh = this.jwtService.sign({ sub: user.userId }, { expiresIn: '7d' });
+        console.log(" refresh from issueTokensForUser", refresh)
         return {
             access_token: access, refresh_token: refresh, user: {
                 userId: user.userId, email: user.email, roles: user.roles.map(r => r.role)
