@@ -21,7 +21,7 @@ export class ListsController {
     create(@Body() body: CreateListsDto) {
         return this.service.create(body);
     }
-    @Roles('admin')
+    @Roles('user')
     @Get()
     findAll() {
         return this.service.findAll();

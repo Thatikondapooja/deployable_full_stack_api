@@ -13,7 +13,7 @@ import { Roles } from 'src/roles/roles.decorator';
 @Controller('cards')
 export class CardsController {
     constructor(private service: CardsService){}
-    @Roles('admin')
+    @Roles('user')
    
     @Post()
     create(@Body() body:CreatedCardsDtos){

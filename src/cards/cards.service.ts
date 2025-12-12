@@ -64,11 +64,34 @@ export class CardsService {
     }
 
  
-    async update(cardId: number, body:any) {
-        await this.cardRepo.update(cardId, body)
-        return this.findOne(cardId);
-     }
- 
+    // async update(cardId: number, body:any) {
+    //     await this.cardRepo.update(cardId, body)
+    //     return this.findOne(cardId);
+    //  }
+    async update(cardId: number, body: any) {
+        const card = await this.findOne(cardId);
+        console.log("card", card)
+
+        if (body.listId) {
+            const list = await this.listRepo.findOne({
+               
+                where: { listId: body.listId },
+            });
+            console.log("list", list)
+            if (!list) {
+                throw new NotFoundException(`List with ID ${body.listId} not found`);
+            }
+
+            card.list = list; // assign relation
+        }
+
+        if (body.cardName) {
+            card.cardName = body.cardName;
+        }
+
+        return await this.cardRepo.save(card);
+    }
+
     async delete(cardId: number) {
         const results = await this.cardRepo.delete(cardId)
         if (results.affected === 0) throw new NotFoundException(`card with id ${cardId} not found`) ;

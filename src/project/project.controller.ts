@@ -34,7 +34,7 @@ export class ProjectController {
     findOne(@Param('id', ParseIntPipe) projectId: number) {
         return this.service.findOne(projectId);
     }
-    @Roles('admin')
+    @Roles('user')
     @Patch(':id')
     update(@Param('id', ParseIntPipe) projectId: number, @Body() body: UpdateProjectDto) {
         return this.service.update(projectId, body);
