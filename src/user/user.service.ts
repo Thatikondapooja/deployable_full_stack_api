@@ -10,6 +10,10 @@ import { CreateUserDto } from './user.dto';
 
 @Injectable()
 export class UserService {
+    updatePassword(userId: any, hashed: any) {
+        throw new Error('Method not implemented.');
+    }
+    
     delete(userId: number) {
         throw new Error('Method not implemented.');
     }
@@ -86,4 +90,5 @@ export class UserService {
         return this.findOne(userId);
     }
 
+    
 }

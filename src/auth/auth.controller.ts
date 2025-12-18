@@ -6,11 +6,15 @@ import { RefreshTokenDto } from './refreshToken.dto';
 import { OtpService } from 'src/otp/otp.service';
 import { VerifyOtpDto } from 'src/otp/verify-otp.dto';
 import { SendOtpDto } from 'src/otp/send-otp.dto';
-
+import { ForgotPasswordDto } from 'src/otp/forgot-password.dto';
+import { OtpPurpose } from 'src/otp/otp.entity';
+import { VerifyForgotOtpDto } from 'src/otp/verify-forgot-otp.dto';
+import { ResetPasswordDto } from 'src/otp/reset-password.dto';
+import { UserService } from 'src/user/user.service';
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService,
-    private otpService: OtpService) { }
+        private otpService: OtpService, private userService: UserService) { }
 
     @Post('register')
     async register(@Body() body: CreateRegisterDto) {
@@ -46,5 +50,39 @@ export class AuthController {
 
         return result;
     }
+    @Post('forgot-password')
+    forgotPassword(@Body() dto: ForgotPasswordDto) {
+        return this.otpService.createAndSendOtp(
+            dto.email,
+            OtpPurpose.FORGOT_PASSWORD,
+        );
+    }
+
+    @Post('verify-forgot-otp')
+    async verifyForgotOtp(@Body() dto: VerifyForgotOtpDto) {
+        await this.otpService.verifyOtp(
+            dto.email,
+            dto.otp,
+            OtpPurpose.FORGOT_PASSWORD,
+        );
+
+        return { message: 'OTP verified' };
+    }
+    @Post('reset-password')
+    async resetPassword(@Body() dto: ResetPasswordDto) {
+        const user = await this.otpService.verifyOtp(
+            dto.email,
+            dto.otp,
+            OtpPurpose.FORGOT_PASSWORD,
+        );
+
+        const hashed = await bcrypt.hash(dto.newPassword, 10);
+        await this.userService.updatePassword(user.userId, hashed);
+
+        return { message: 'Password reset successful' };
+    }
+
+
+    
    
 }

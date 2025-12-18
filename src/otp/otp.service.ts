@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { InjectRepository } from "@nestjs/typeorm";
 import { randomInt } from "crypto";
 import { User } from "src/user/user.entity";
-import { Otp } from "./otp.entity";
+import { Otp, OtpPurpose } from "./otp.entity";
 import { MailService } from "src/mail/mail.service";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt'
@@ -18,15 +18,18 @@ export class OtpService {
         return randomInt(0, 1_000_000).toString().padStart(6, '0');
     }
 
-    async createAndSendOtp(email: string) {
+    async createAndSendOtp(email: string, purpose: OtpPurpose) {
         const user = await this.userRepo.findOne({
             where: { email },
+            
         });
 
         console.log("OTP: Found user →", user);
 
         if (!user) throw new NotFoundException('User not found');
-
+          
+       const purposes= await this.otpRepo.delete({ user, purpose });
+        console.log(" delete purposes", purposes)
         const otpPlain = this.generateOtpString();
         console.log("otpPlain:", otpPlain);
 
@@ -36,6 +39,7 @@ export class OtpService {
         const otpEntity = this.otpRepo.create({
             user:user,           // ✔ FIXED — proper relation
             otpHash,
+            purpose,
             expiresAt: new Date(Date.now() + 5 * 60 * 1000),
         });
 
@@ -48,7 +52,7 @@ export class OtpService {
         return { message: 'OTP sent successfully' };
     }
 
-    async verifyOtp(email: string, otp: string) {
+    async verifyOtp(email: string, otp: string, purpose: OtpPurpose) {
         const user = await this.userRepo.findOne({ where: { email } });
 
         console.log("Verify OTP For User →", user);
@@ -56,10 +60,13 @@ export class OtpService {
         if (!user) throw new NotFoundException('User not found');
 
         const otpEntity = await this.otpRepo.findOne({
-            where: { user :{userId:user.userId}},
+            where: { user: { userId: user.userId }, purpose },
             relations: ['user'],
             order: { createdAt: 'DESC' },
+            
         });
+
+        console.log("otpEntity →", otpEntity);
 
         if (!otpEntity) throw new BadRequestException('No OTP found');
 
