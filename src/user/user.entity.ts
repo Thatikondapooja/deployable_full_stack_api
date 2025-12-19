@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Role } from 'src/roles/role.entity';
-import { Otp } from 'src/otp/otp.entity';
+import { Otps } from 'src/otp/otp.entity';
 
 @Entity()
 export class User {
@@ -25,8 +25,8 @@ export class User {
     @ManyToMany(() => Role, (role) => role.users, { eager: false })
     @JoinTable()
     roles: Role[];
-    @OneToMany(() => Otp, (otp) => otp.user)
-    otps: Otp[];
+    @OneToMany(() => Otps, (otp) => otp.user)
+    otps: Otps[];
 
     
    

@@ -11,11 +11,12 @@ import { User } from 'src/user/user.entity';
 export enum OtpPurpose {
     LOGIN = 'LOGIN',
     FORGOT_PASSWORD = 'FORGOT_PASSWORD',
+    PASSWORD_RESET = 'PASSWORD_RESET',
 }
 
 @Entity('otps')
 @Index(['user', 'purpose'])
-export class Otp {
+export class Otps {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -41,4 +42,8 @@ export class Otp {
 
     @CreateDateColumn()
     createdAt: Date;
+    static purpose: string;
+    // ✅ Add this column
+    @Column({ default: false })
+    isUsed: boolean;
 }

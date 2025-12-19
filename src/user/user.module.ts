@@ -13,6 +13,6 @@ import { RolesModule } from 'src/roles/roles.module';
   ],
   providers: [UserService],
   controllers: [UserController],
-  exports: [UserService],
+  exports: [UserService, TypeOrmModule],
 })
 export class UserModule {}

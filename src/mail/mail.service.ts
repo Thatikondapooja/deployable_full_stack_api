@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { OtpPurpose } from "src/otp/otp.entity";
 
 @Injectable()
 export class MailService {
@@ -15,26 +16,40 @@ export class MailService {
         });
     }
 
-    async sendOtpEmail(to: string, otp: string) {
-        if (!to) throw new Error('Recipient email is required');
+  async sendOtpEmail(to: string, otp: string, purpose: OtpPurpose) {
+    if (!to) throw new Error('Recipient email is required');
 
-        await this.transporter.sendMail({
-            from: `"YourApp Security" <${process.env.MAIL_USER}>`,
-            to,
-            subject: 'Verify Your Email – One-Time Password',
-            html: `
+    const subject =
+      purpose === OtpPurpose.FORGOT_PASSWORD
+        ? 'Reset Your Password – OTP Code'
+        : 'Verify Your Email – OTP Code';
+    console.log("purpose", purpose)
+    const message =
+      purpose === OtpPurpose.FORGOT_PASSWORD
+        ? `
+            <p style="font-size: 14px; color: #333;">
+                You requested to reset your password. Use the OTP below to continue.
+            </p>
+        `
+        : `
+            <p style="font-size: 14px; color: #333;">
+                Use the following One-Time Password (OTP) to complete your sign-in.
+            </p>
+        `;
+    console.log(" purpose === OtpPurpose.FORGOT_PASSWORD", purpose)
+
+    await this.transporter.sendMail({
+      from: `"YourApp Security" <${process.env.MAIL_USER}>`,
+      to,
+      subject,
+      html: `
         <div style="font-family: Arial, sans-serif; background-color: #f6f8fa; padding: 24px;">
           <div style="max-width: 480px; margin: auto; background: #ffffff; padding: 24px; border-radius: 8px;">
             
-            <h2 style="color: #1a73e8; margin-bottom: 16px;">Email Verification</h2>
-            
-            <p style="font-size: 14px; color: #333;">
-              Hello,
-            </p>
+            <h2 style="color: #1a73e8; margin-bottom: 16px;">${purpose === OtpPurpose.FORGOT_PASSWORD ? 'Password Reset OTP' : 'Login Verification'
+        }</h2>
 
-            <p style="font-size: 14px; color: #333;">
-              Use the following One-Time Password (OTP) to complete your sign-in.
-            </p>
+            ${message}
 
             <div style="
               font-size: 28px;
@@ -48,14 +63,13 @@ export class MailService {
             </div>
 
             <p style="font-size: 13px; color: #c90b0bff;">
-              This OTP is valid for <strong>5 minutes</strong>.  
-              Please do not share this code with anyone.
+              This OTP is valid for <strong>5 minutes</strong>.
             </p>
 
             <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
 
             <p style="font-size: 12px; color: #777;">
-              If you did not request this verification, please ignore this email.
+              If you did not request this, please ignore this email.
             </p>
 
             <p style="font-size: 12px; color: #777; margin-top: 16px;">
@@ -65,9 +79,8 @@ export class MailService {
           </div>
         </div>
         `,
-        });
+    });
 
-        console.log(`OTP email sent to ${to}`);
-    }
-
+    console.log(`OTP email sent to ${to} with purpose: ${purpose}`);
+  }
 }

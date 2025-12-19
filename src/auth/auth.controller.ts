@@ -11,6 +11,8 @@ import { OtpPurpose } from 'src/otp/otp.entity';
 import { VerifyForgotOtpDto } from 'src/otp/verify-forgot-otp.dto';
 import { ResetPasswordDto } from 'src/otp/reset-password.dto';
 import { UserService } from 'src/user/user.service';
+import * as bcrypt from 'bcrypt';
+
 @Controller('auth')
 export class AuthController {
     constructor(private readonly authService: AuthService,
@@ -34,7 +36,7 @@ export class AuthController {
     @Post('send-otp')
     sendOtp(@Body() dto: SendOtpDto) {
         console.log("OTP API CALLED WITH EMAIL =", dto.email);
-        return this.otpService.createAndSendOtp(dto.email);
+        return this.otpService.createAndSendOtp(dto.email, dto.purpose);
     }
     @Post('verify-otp')
     async verifyOtp(@Body() body: VerifyOtpDto) {
@@ -42,7 +44,7 @@ export class AuthController {
             throw new BadRequestException('Email and OTP are required');
         }
 
-        const result = await this.otpService.verifyOtp(body.email, body.otp);
+        const result = await this.otpService.verifyOtp(body.email, body.otp, OtpPurpose.LOGIN);
         console.log("result", result)
         if (!result || !result.user) {
             throw new BadRequestException('OTP verification failed');
@@ -51,38 +53,28 @@ export class AuthController {
         return result;
     }
     @Post('forgot-password')
-    forgotPassword(@Body() dto: ForgotPasswordDto) {
-        return this.otpService.createAndSendOtp(
-            dto.email,
-            OtpPurpose.FORGOT_PASSWORD,
-        );
+    async forgotPassword(@Body() dto: ForgotPasswordDto) {
+        // Create OTP with FORGOT_PASSWORD purpose
+        return this.otpService.createAndSendOtp(dto.email, OtpPurpose.FORGOT_PASSWORD);
     }
 
     @Post('verify-forgot-otp')
     async verifyForgotOtp(@Body() dto: VerifyForgotOtpDto) {
-        await this.otpService.verifyOtp(
+        // Use the purpose from DTO to verify
+        const result = await this.otpService.verifyOtp(
             dto.email,
             dto.otp,
-            OtpPurpose.FORGOT_PASSWORD,
+            OtpPurpose.FORGOT_PASSWORD // always use FORGOT_PASSWORD here
         );
 
-        return { message: 'OTP verified' };
+        return { message: 'OTP verified successfully' };
     }
+
+
+  
     @Post('reset-password')
-    async resetPassword(@Body() dto: ResetPasswordDto) {
-        const user = await this.otpService.verifyOtp(
-            dto.email,
-            dto.otp,
-            OtpPurpose.FORGOT_PASSWORD,
-        );
-
-        const hashed = await bcrypt.hash(dto.newPassword, 10);
-        await this.userService.updatePassword(user.userId, hashed);
-
-        return { message: 'Password reset successful' };
+    async resetPassword(@Body() dto: { email: string, password: string }) {
+        return this.authService.resetPassword(dto);
     }
 
-
-    
-   
 }

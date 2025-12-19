@@ -2,14 +2,14 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { InjectRepository } from "@nestjs/typeorm";
 import { randomInt } from "crypto";
 import { User } from "src/user/user.entity";
-import { Otp, OtpPurpose } from "./otp.entity";
+import { Otps, OtpPurpose } from "./otp.entity";
 import { MailService } from "src/mail/mail.service";
 import { Repository } from "typeorm";
 import * as bcrypt from 'bcrypt'
 @Injectable()
 export class OtpService {
     constructor(
-        @InjectRepository(Otp) private otpRepo: Repository<Otp>,
+        @InjectRepository(Otps) private otpRepo: Repository<Otps>,
         @InjectRepository(User) private userRepo: Repository<User>,
         private mailService: MailService,
     ) { }
@@ -29,6 +29,7 @@ export class OtpService {
         if (!user) throw new NotFoundException('User not found');
           
        const purposes= await this.otpRepo.delete({ user, purpose });
+       
         console.log(" delete purposes", purposes)
         const otpPlain = this.generateOtpString();
         console.log("otpPlain:", otpPlain);
@@ -47,26 +48,20 @@ export class OtpService {
 
         console.log("Sending OTP to:", user.email);
 
-        await this.mailService.sendOtpEmail(user.email, otpPlain);
+        await this.mailService.sendOtpEmail(user.email, otpPlain,purpose);
 
         return { message: 'OTP sent successfully' };
     }
 
     async verifyOtp(email: string, otp: string, purpose: OtpPurpose) {
         const user = await this.userRepo.findOne({ where: { email } });
-
-        console.log("Verify OTP For User →", user);
-
         if (!user) throw new NotFoundException('User not found');
 
         const otpEntity = await this.otpRepo.findOne({
             where: { user: { userId: user.userId }, purpose },
             relations: ['user'],
             order: { createdAt: 'DESC' },
-            
         });
-
-        console.log("otpEntity →", otpEntity);
 
         if (!otpEntity) throw new BadRequestException('No OTP found');
 
@@ -81,14 +76,20 @@ export class OtpService {
         }
 
         const isMatch = await bcrypt.compare(otp, otpEntity.otpHash);
-
         if (!isMatch) {
             otpEntity.attempts++;
             await this.otpRepo.save(otpEntity);
             throw new BadRequestException('Invalid OTP');
         }
 
-        await this.otpRepo.delete(otpEntity.id);
+        // Delete OTP for FORGOT_PASSWORD flow
+        if (purpose === OtpPurpose.FORGOT_PASSWORD) {
+            await this.otpRepo.delete(otpEntity.id); // here we can delete the forgot pwd immedietly. if you donnot want delete immediatly we can use   otpEntity.isUsed = true;
+            // await this.otpRepo.save(otpEntity); if block.
+        } else {
+            otpEntity.isUsed = true;
+            await this.otpRepo.save(otpEntity);
+        }
 
         return { message: 'OTP verified successfully', user };
     }

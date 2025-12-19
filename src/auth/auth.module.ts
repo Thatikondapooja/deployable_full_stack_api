@@ -8,6 +8,8 @@ import { JwtStrategy } from './jwt.strategy';
 import { RolesModule } from 'src/roles/roles.module';
 import { RolesService } from 'src/roles/roles.service';
 import { OtpModule } from 'src/otp/otp.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from 'src/user/user.entity';
 
 @Module({
   imports: [
@@ -15,9 +17,12 @@ import { OtpModule } from 'src/otp/otp.module';
     RolesModule,
     PassportModule,
     OtpModule,
+    TypeOrmModule.forFeature([User]), // even if already in user module
+
     JwtModule.register({
       secret: 'yourSecretKey',  // MUST match JwtStrategy secret
       signOptions: { expiresIn: '1h' },
+     
     }),
   ],
   providers: [AuthService,JwtStrategy],
