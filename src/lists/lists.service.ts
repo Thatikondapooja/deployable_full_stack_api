@@ -7,8 +7,7 @@ import { CreateListsDto } from './create-lists-dto';
 
 @Injectable()
 export class ListsService {
-    cardRepository: any;
-    listRepository: any;
+   
     constructor(
         @InjectRepository(Lists)
         private listRepo: Repository<Lists>,
